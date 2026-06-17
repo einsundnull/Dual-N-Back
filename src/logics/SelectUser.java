@@ -1,17 +1,14 @@
 package logics;
 
-import java.awt.Image;
+import java.awt.Color;
+import java.awt.Font;
 import java.io.File;
-import java.net.URL;
-import java.util.ArrayList;
-
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 
 import enums.TypeOfDropMenu;
 import enums.TypeOfScrollPane;
 import files.FilesCls;
 import files.ResultsFiles;
+import language.LanguageClass;
 import popUps.DeleteUserPopUp;
 import screens.OptionMenu;
 import screens.ResultScreen;
@@ -37,12 +34,13 @@ public class SelectUser {
     private void setScrollMenuChooseUser() {
         drop   = new CustomDropMenu2(TypeOfDropMenu.FROM_LEFT, false);
         scroll = new CustomScrollPane(TypeOfScrollPane.VERTICALLY_RIGHT,
-                                      menuWidth - StartScreen.screenWidth * 0.0125, menuHeight);
+                                      menuWidth, menuHeight);
         drop.setPrefSize(menuWidth, menuHeight);
+        drop.setTitle(LanguageClass.word(StartScreen.indexLang, 1));
         drop.showCloseArrowAfterClosing(false);
         drop.showCloseArrowWhenDropMenuIsVisible(true);
         drop.add(scroll.newScrollPane());
-        scroll.setBarVerticalBarVisible(true);
+        scroll.setBarVerticalBarVisible(false);
 
         drop.closeArrowSetOnAction(() -> {
             if (drop.isPlay()) {
@@ -66,6 +64,14 @@ public class SelectUser {
         setUserNameBtnsAndDeleteButtons();
     }
 
+    // Modern row palette
+    private static final String FONT       = "Segoe UI";
+    private static final Color  ROW_BG     = Color.WHITE;
+    private static final Color  ROW_TEXT   = new Color(0x1E, 0x24, 0x30);
+    private static final Color  ROW_HOVER  = new Color(0xF0, 0xF3, 0xF7);
+    private static final Color  DEL_TEXT   = new Color(0xD0, 0x40, 0x40);
+    private static final Color  DEL_HOVER  = new Color(0xFC, 0xEC, 0xEC);
+
     public static void setUserNameBtnsAndDeleteButtons() {
         String path = System.getProperty("user.home") + File.separator
                     + "n-back" + File.separator + "user";
@@ -73,54 +79,49 @@ public class SelectUser {
         String[] list = dir.list();
         if (list == null) list = new String[0];
 
-        ArrayList<CustomButton> selectBtns = new ArrayList<>();
-        ArrayList<CustomButton> deleteBtns = new ArrayList<>();
+        int W    = (int) menuWidth;
+        int pad  = 12, rowH = 46, gap = 6, delW = 40;
+        int selW = W - pad * 2 - delW - 6;
+        int y    = 10;
 
         for (int i = 0; i < list.length; i++) {
             final String userId = list[i];
 
-            // Select button
-            CustomButton sel = new CustomButton(
-                StartScreen.screenWidth * 0.14375,
-                StartScreen.screenWidth * 0.01875);
+            // Select row (flat, left-aligned, hover)
+            CustomButton sel = new CustomButton(selW, rowH);
             sel.setID(userId);
             sel.setText(userId.replace("_", " "));
-            sel.setLayoutX(StartScreen.screenWidth * 0.04375);
-            sel.setLayoutY(StartScreen.screenWidth * 0.01875 + i * StartScreen.screenWidth * 0.025);
+            sel.setFlat(ROW_BG, ROW_TEXT, ROW_HOVER);
+            sel.setFontStyle(FONT, Font.PLAIN, 15);
+            sel.setTextAlignLeft();
+            sel.setLayoutX(pad);
+            sel.setLayoutY(y);
             sel.setOnMouseClicked(() -> {
                 StartScreen.user = userId.replace(" ", "_");
                 selectUserProcess();
                 drop.playAndBack();
                 StartScreen.mainWindow.disable(false);
             });
-            selectBtns.add(sel);
             scroll.add(sel.newButton());
 
-            // Delete button with red-X icon
-            CustomButton del = new CustomButton(
-                StartScreen.screenWidth * 0.01875,
-                StartScreen.screenWidth * 0.01875);
+            // Delete button (✕)
+            CustomButton del = new CustomButton(delW, rowH);
             del.setID(userId);
-            URL iconUrl = SelectUser.class.getResource("/img/redCross.png");
-            if (iconUrl != null) {
-                int sz = (int)(StartScreen.screenWidth * 0.0125);
-                ImageIcon icon = new ImageIcon(
-                    new ImageIcon(iconUrl).getImage().getScaledInstance(sz, sz, Image.SCALE_SMOOTH));
-                del.getFrame().add(new JLabel(icon));
-            } else {
-                del.setText("X");
-            }
-            del.setLayoutX(StartScreen.screenWidth * 0.01875);
-            del.setLayoutY(StartScreen.screenWidth * 0.01875 + i * StartScreen.screenWidth * 0.025);
+            del.setText("✕");
+            del.setFlat(ROW_BG, DEL_TEXT, DEL_HOVER);
+            del.setFontStyle(FONT, Font.BOLD, 15);
+            del.setLayoutX(W - pad - delW);
+            del.setLayoutY(y);
             del.setOnMouseClicked(() -> {
                 StartScreen.userToDelete = del.getID();
                 new DeleteUserPopUp();
             });
-            deleteBtns.add(del);
             scroll.add(del.newButton());
+
+            y += rowH + gap;
         }
 
-        double contentH = StartScreen.screenWidth * 0.08125 + StartScreen.screenWidth * 0.025 * list.length;
+        double contentH = y + 10;
         scroll.setDisplayHeight(contentH > menuHeight ? contentH : menuHeight);
 
         if (list.length <= 0) {

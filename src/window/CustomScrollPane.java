@@ -1,7 +1,9 @@
 package window;
 
+import java.awt.Color;
 import java.awt.Dimension;
 
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -15,8 +17,12 @@ public class CustomScrollPane {
 
     public CustomScrollPane(TypeOfScrollPane type, double width, double height) {
         display = new JPanel(null);
+        display.setOpaque(true);
+        display.setBackground(Color.WHITE);
         display.setPreferredSize(new Dimension((int)width, (int)height));
         scrollPane = new JScrollPane(display);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setSize((int)width, (int)height);

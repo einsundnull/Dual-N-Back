@@ -106,8 +106,9 @@ public class StartScreen {
 
     private final String appVersion = "2021.04.14";
 
-    private PaneArray paneLngI;
+    private static PaneArray paneLngI;
     private SwingPanel menu;
+    private static final int[] flagLang = { 14, 4, 10, 8, 15, 5 };   // pane index -> language index
 
     // --- Theme (light "dashboard") ---
     private static final String  FONT       = "Segoe UI";
@@ -290,6 +291,7 @@ public class StartScreen {
             paneLngI.get(i).setBounds(24 + col * (fw + fgx), flagsY + row * (fh + fgy), fw, fh);
         }
         menu.setBounds(sw - 50, flagsY - 4, 30, 30);
+        highlightActiveFlag();
         versionAndUpdate.setBounds(24, H - 30, sw - 48, 18);
 
         // --- Content ---
@@ -438,6 +440,7 @@ public class StartScreen {
         if (headerLbl != null)  headerLbl.setText(StartTrainingTxt);
 
         enableButtonsAfterChoosingLanguage();
+        highlightActiveFlag();
         new FilesCls();
         FilesCls.storeFileStartUpSettings();
     }
@@ -620,39 +623,46 @@ public class StartScreen {
         Image img = icon.getImage().getScaledInstance(32, 22, Image.SCALE_SMOOTH);
         JLabel lbl = new JLabel(new ImageIcon(img));
         lbl.setBounds(0, 0, 32, 22);
-        paneLngI.get(paneIndex).add(lbl);
-        paneLngI.get(paneIndex).setOnMouseClicked(() -> {
+        SwingPanel pane = paneLngI.get(paneIndex);
+        pane.add(lbl);
+        pane.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR));
+        pane.setOnMouseClicked(() -> {
             indexLang = langIndex;
             displayLicense();
             setLanguage(indexLang);
-            setLanguagesButtonsVisible(true, false);
-            Intro.cancel();
+            highlightActiveFlag();
+        });
+        // Hover affordance
+        pane.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override public void mouseEntered(java.awt.event.MouseEvent e) {
+                pane.setBorder(BorderFactory.createLineBorder(COL_ACCENT, 2));
+            }
+            @Override public void mouseExited(java.awt.event.MouseEvent e) {
+                highlightActiveFlag();
+            }
         });
     }
 
-    private void setLanguageMenu() {
-        menu = new SwingPanel();
-
-        java.net.URL url = getClass().getResource("/flag/earth.png");
-        if (url != null) {
-            ImageIcon icon = new ImageIcon(
-                new ImageIcon(url).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
-            JLabel earthLbl = new JLabel(icon);
-            earthLbl.setBounds(0, 0, 30, 30);
-            earthLbl.addMouseListener(new java.awt.event.MouseAdapter() {
-                @Override public void mouseClicked(java.awt.event.MouseEvent e) {
-                    new Intro();
-                    setLanguagesButtonsVisible(false, true);
-                }
-            });
-            menu.add(earthLbl);
+    /** Outlines the flag of the currently selected language. */
+    private static void highlightActiveFlag() {
+        if (paneLngI == null) return;
+        for (int i = 0; i < flagLang.length; i++) {
+            paneLngI.get(i).setBorder(flagLang[i] == indexLang
+                ? BorderFactory.createLineBorder(COL_ACCENT, 2)
+                : BorderFactory.createLineBorder(COL_BORDER, 1));
         }
+    }
+
+    private void setLanguageMenu() {
+        // Earth-icon toggle removed: language flags are always visible in the sidebar.
+        menu = new SwingPanel();
+        menu.setVisible(false);
         sidebar.add(menu);
     }
 
     private void setLanguagesButtonsVisible(boolean visMenu, boolean visLangBtns) {
-        if (menu != null) menu.setVisible(visMenu);
-        for (int i = 0; i < 10; i++) paneLngI.get(i).setVisible(visLangBtns);
+        // Flags stay visible at all times now; parameters kept for call-site compatibility.
+        for (int i = 0; i < 10; i++) paneLngI.get(i).setVisible(true);
     }
 
     // -----------------------------------------------------------------------
