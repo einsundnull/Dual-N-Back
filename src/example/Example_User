@@ -1,0 +1,10 @@
+n-back: 2
+sessionLength: 30
+version: 2.0.1
+mode: COLOR_AND_SOUND
+duration_Training: false
+repeat_Time: 2000
+keep_lenght_of_trial_constant: false
+durationVariationInProgressBar: 60000
+additionalDuration: 0
+dateOfLastTraining: null
