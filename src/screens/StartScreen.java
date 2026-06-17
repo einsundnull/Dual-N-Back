@@ -19,7 +19,6 @@ import arrays.CustomButtonArray;
 import arrays.LabelArray;
 import arrays.PaneArray;
 import arrays.TextFieldArray;
-import enums.TypeOfPopUpWindow;
 import enums.TypeOfWindow;
 import files.FilesCls;
 import files.ResultsFiles;
@@ -39,7 +38,6 @@ import training.Intro;
 import training.Rect;
 import training.TimerClass;
 import window.CustomCheckBox;
-import window.CustomPopUpWindow;
 import window.CustomTimer;
 import window.CustomWindow;
 import window.SwingLabel;
@@ -69,7 +67,6 @@ public class StartScreen {
 
     public static OptionMenu options;
     public static CustomWindow mainWindow;
-    private static CustomPopUpWindow rights;
 
     public static TextFieldArray flds;
     public static LabelArray     lbls;
@@ -162,11 +159,6 @@ public class StartScreen {
         Lists.setColorList();
         setLanguage(indexLang);
 
-        if (indexLang == 0) {
-            new Intro();
-            setLanguagesButtonsVisible(false, true);
-            for (int i = 0; i <= 6; i++) btns.get(i).setDisable(true);
-        }
         if ("No".equals(userExists)) btns.get(0).setDisable(true);
 
         String path = System.getProperty("user.home") + File.separator + "n-back" + File.separator + "user";
@@ -446,42 +438,6 @@ public class StartScreen {
     }
 
     // -----------------------------------------------------------------------
-    private void displayLicense() {
-        mainWindow.disable(true);
-        rights = new CustomPopUpWindow(TypeOfPopUpWindow.CONFIRM);
-        rights.allowToCloseByPressingESC(true);
-        rights.allowToCloseByCloseButton(false);
-        rights.addSymbolsToConfirmButtons(true);
-        rights.setAlwaysOnTop(true);
-        rights.setOnMouseDragged(false);
-        rights.setTextPositionY(15);
-        rights.setCheckBoxPosition(15, screenWidth * 0.0625);
-        rights.setText(LanguageClass.word(indexLang, 43));
-        rights.setCheckBoxText(LanguageClass.word(indexLang, 44));
-        rights.getConfirmButton().setText(LanguageClass.word(indexLang, 45));
-        rights.getConfirmButton().setOnMouseClicked(() -> {
-            mainWindow.disable(false);
-            rights.close();
-        });
-        rights.getCancelButton().setText(LanguageClass.word(indexLang, 46));
-        rights.getCancelButton().setOnMouseClicked(() -> revertLanguage());
-        rights.setOnCloseRequest(() -> revertLanguage());
-        rights.show();
-    }
-
-    private void revertLanguage() {
-        indexLang = 0;
-        setLanguage(0);
-        lbls.get(0).setText("");
-        rights.close();
-        disableButtons(true);
-        if ("No".equals(userExists)) btns.get(0).setDisable(true);
-        mainWindow.disable(false);
-        setLanguagesButtonsVisible(false, true);
-        new Intro();
-    }
-
-    // -----------------------------------------------------------------------
     private void setBtnOnAction() throws FileNotFoundException {
         btns.get(0).setOnMouseClicked(() -> {
             if (!btns.get(4).isDisable()) {
@@ -628,7 +584,6 @@ public class StartScreen {
         pane.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR));
         pane.setOnMouseClicked(() -> {
             indexLang = langIndex;
-            displayLicense();
             setLanguage(indexLang);
             highlightActiveFlag();
         });
